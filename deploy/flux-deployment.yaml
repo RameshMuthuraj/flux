@@ -24,7 +24,7 @@ spec:
         # There are no ":latest" images for flux. Find the most recent
         # release or image version at https://quay.io/weaveworks/flux
         # and replace the tag here.
-        image: quay.io/weaveworks/flux:1.2.1
+        image: quay.io/weaveworks/flux:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3030 # informational
@@ -40,7 +40,7 @@ spec:
         # - --memcached-service=memcached
 
         # replace (at least) the following URL
-        - --git-url=git@github.com:weaveworks/flux-example
+        - --git-url=git@github.com:sambooo/flux-secret-test
         - --git-branch=master
         # include these next two to connect to an "upstream" service
         # (e.g., Weave Cloud). The token is particular to the service.

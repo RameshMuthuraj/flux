@@ -124,16 +124,21 @@ func (opts *controllerReleaseOpts) RunE(cmd *cobra.Command, args []string) error
 	}
 
 	ctx := context.Background()
-
-	jobID, err := opts.API.UpdateImages(ctx, update.ReleaseSpec{
+	spec := update.ReleaseSpec{
 		ServiceSpecs: controllers,
 		ImageSpec:    image,
 		Kind:         kind,
 		Excludes:     excludes,
-	}, opts.cause)
+	}
+	jobID, err := opts.API.UpdateManifests(ctx, update.Spec{
+		Type:  update.Images,
+		Cause: opts.cause,
+		Spec:  spec,
+	})
 	if err != nil {
 		return err
 	}
+	fmt.Fprintln(cmd.OutOrStderr(), "jobID:", jobID)
 
 	return await(ctx, cmd.OutOrStdout(), cmd.OutOrStderr(), opts.API, jobID, !opts.dryRun, opts.verbosity)
 }
