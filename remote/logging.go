@@ -16,7 +16,7 @@ type ErrorLoggingPlatform struct {
 	logger log.Logger
 }
 
-func NewErrorLoggingPlatform(s api.Server, l log.Logger) *ErrorLoggingPlatform {
+func NewErrorLoggingServer(s api.Server, l log.Logger) *ErrorLoggingPlatform {
 	return &ErrorLoggingPlatform{s, l}
 }
 

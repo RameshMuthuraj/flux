@@ -98,7 +98,7 @@ var _ api.Server = &MockPlatform{}
 // essentially wrap the platform in various transports, we expect
 // arguments and answers to be preserved.
 
-func PlatformTestBattery(t *testing.T, wrap func(mock api.Server) api.Server) {
+func ServerTestBattery(t *testing.T, wrap func(mock api.Server) api.Server) {
 	// set up
 	namespace := "the-space-of-names"
 	serviceID := flux.MustParseResourceID(namespace + "/service")
