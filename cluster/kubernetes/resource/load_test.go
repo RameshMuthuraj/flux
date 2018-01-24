@@ -193,7 +193,7 @@ items:
 	}
 
 	if !reflect.DeepEqual(expected, objs) {
-		t.Errorf("Expected:\n%#s\ngot:\n%#s", expected, objs)
+		t.Errorf("Expected:\n%s\ngot:\n%s", expected, objs)
 	}
 }
 
