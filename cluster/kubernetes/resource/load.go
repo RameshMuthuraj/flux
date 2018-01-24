@@ -56,7 +56,7 @@ func ParseMultidoc(multidoc []byte, source string) (map[string]resource.Resource
 	chunks.Buffer(initialBuffer, 1024*1024) // Allow growth to 1MB
 	chunks.Split(splitYAMLDocument)
 
-	var obj resource.Resource
+	var obj *BaseObject
 	var err error
 	for chunks.Scan() {
 		// It's not guaranteed that the return value of Bytes() will not be mutated later:
@@ -65,13 +65,33 @@ func ParseMultidoc(multidoc []byte, source string) (map[string]resource.Resource
 		bytes := chunks.Bytes()
 		bytes2 := make([]byte, len(bytes), cap(bytes))
 		copy(bytes2, bytes)
+
 		if obj, err = unmarshalObject(source, bytes2); err != nil {
 			return nil, errors.Wrapf(err, "parsing YAML doc from %q", source)
 		}
+
 		if obj == nil {
 			continue
 		}
-		objs[obj.ResourceID().String()] = obj
+
+		if obj.Kind == "List" {
+			err := unmarshalList(source, obj, objs)
+
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			r, err := unmarshalKind(*obj)
+
+			if r == nil {
+				continue
+			}
+
+			if err != nil {
+				return nil, err
+			}
+			objs[obj.ResourceID().String()] = r
+		}
 	}
 
 	if err := chunks.Err(); err != nil {

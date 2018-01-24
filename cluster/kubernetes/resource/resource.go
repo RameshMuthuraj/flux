@@ -1,8 +1,6 @@
 package resource
 
 import (
-	"fmt"
-	"log"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -20,34 +18,74 @@ const (
 // -- unmarshaling code for specific object and field types
 
 // struct to embed in objects, to provide default implementation
-type baseObject struct {
-	source string
-	bytes  []byte
-	Kind   string `yaml:"kind"`
-	Meta   struct {
-		Namespace   string            `yaml:"namespace"`
-		Name        string            `yaml:"name"`
-		Annotations map[string]string `yaml:"annotations,omitempty"`
-	} `yaml:"metadata"`
+// type BaseObject struct {
+// 	source string
+// 	bytes  []byte
+// 	Kind   string `yaml:"kind"`
+// 	Meta   struct {
+// 		Namespace   string            `yaml:"namespace"`
+// 		Name        string            `yaml:"name"`
+// 		Annotations map[string]string `yaml:"annotations,omitempty"`
+// 	} `yaml:"metadata"`
+// }
+type Metadata struct {
+	Name        string            `yaml:"name"`
+	Annotations map[string]string `yaml:"annotations"`
+	Namespace   string            `yaml:"namespace"`
 }
 
-func (o baseObject) ResourceID() flux.ResourceID {
-	ns := o.Meta.Namespace
+type Container struct {
+	Name  string `yaml:"name"`
+	Image string `yaml:"image"`
+}
+
+type BaseObject struct {
+	source   string
+	bytes    []byte
+	Metadata Metadata `yaml:"metadata"`
+	Kind     string   `yaml:"kind"`
+	Spec     struct {
+		Template struct {
+			Spec struct {
+				Containers []Container `yaml:"containers"`
+			} `yaml:"spec"`
+		} `yaml:"template"`
+		JobTemplate struct {
+			Spec struct {
+				Template struct {
+					Spec struct {
+						Containers []Container `yaml:"containers"`
+					} `yaml:"spec"`
+				} `yaml:"template"`
+			} `yaml:"spec"`
+		} `yaml:"jobTemplate"`
+	} `yaml:"spec"`
+}
+
+func (m Metadata) AnnotationsOrNil() map[string]string {
+	if m.Annotations == nil {
+		return map[string]string{}
+	}
+	return m.Annotations
+}
+
+func (o BaseObject) ResourceID() flux.ResourceID {
+	ns := o.Metadata.Namespace
 	if ns == "" {
 		ns = "default"
 	}
-	return flux.MakeResourceID(ns, o.Kind, o.Meta.Name)
+	return flux.MakeResourceID(ns, o.Kind, o.Metadata.Name)
 }
 
 // It's useful for comparisons in tests to be able to remove the
 // record of bytes
-func (o *baseObject) debyte() {
+func (o *BaseObject) debyte() {
 	o.bytes = nil
 }
 
-func (o baseObject) Policy() policy.Set {
+func (o BaseObject) Policy() policy.Set {
 	set := policy.Set{}
-	for k, v := range o.Meta.Annotations {
+	for k, v := range o.Metadata.Annotations {
 		if strings.HasPrefix(k, PolicyPrefix) {
 			p := strings.TrimPrefix(k, PolicyPrefix)
 			if v == "true" {
@@ -60,79 +98,68 @@ func (o baseObject) Policy() policy.Set {
 	return set
 }
 
-func (o baseObject) Source() string {
+func (o BaseObject) Source() string {
 	return o.source
 }
 
-func (o baseObject) Bytes() []byte {
+func (o BaseObject) Bytes() []byte {
 	return o.bytes
 }
 
-func unmarshalObject(source string, bytes []byte) (resource.Resource, error) {
-	var base = baseObject{source: source, bytes: bytes}
+func unmarshalObject(source string, bytes []byte) (*BaseObject, error) {
+	var base = BaseObject{source: source, bytes: bytes}
 	if err := yaml.Unmarshal(bytes, &base); err != nil {
 		return nil, err
 	}
 
-	if base.Kind == "List" {
-		// This check probably needs to happen in ParseMultidoc.
-		// Maybe append it to the map of resources there?
-		// IDEA: pass in the map to this function and append via side effect.
-		// Loop over list.Items to append.
-	}
-	r, err := unmarshalKind(base, bytes)
-	if err != nil {
-		return nil, makeUnmarshalObjectErr(source, err)
-	}
-	return r, nil
+	// if base.Kind == "List" {
+	// 	// This check probably needs to happen in ParseMultidoc.
+	// 	// Maybe append it to the map of resources there?
+	// 	// IDEA: pass in the map to this function and append via side effect.
+	// 	// Loop over list.Items to append.
+	// }
+
+	return &base, nil
+	// r, err := unmarshalKind(base, bytes)
+	// if err != nil {
+	// 	return nil, makeUnmarshalObjectErr(source, err)
+	// }
+	// return r, nil
 }
 
-func unmarshalKind(base baseObject, bytes []byte) (resource.Resource, error) {
+func unmarshalKind(base BaseObject) (resource.Resource, error) {
+	bytes := base.bytes
 	switch base.Kind {
 	case "CronJob":
-		var cj = CronJob{baseObject: base}
+		var cj = CronJob{BaseObject: base}
 		if err := yaml.Unmarshal(bytes, &cj); err != nil {
 			return nil, err
 		}
 		return &cj, nil
 	case "DaemonSet":
-		var ds = DaemonSet{baseObject: base}
+		var ds = DaemonSet{BaseObject: base}
 		if err := yaml.Unmarshal(bytes, &ds); err != nil {
 			return nil, err
 		}
 		return &ds, nil
 	case "Deployment":
-		var dep = Deployment{baseObject: base}
+		var dep = Deployment{BaseObject: base}
 		if err := yaml.Unmarshal(bytes, &dep); err != nil {
 			return nil, err
 		}
 		return &dep, nil
 	case "Namespace":
-		var ns = Namespace{baseObject: base}
+		var ns = Namespace{BaseObject: base}
 		if err := yaml.Unmarshal(bytes, &ns); err != nil {
 			return nil, err
 		}
 		return &ns, nil
 	case "StatefulSet":
-		var ss = StatefulSet{baseObject: base}
+		var ss = StatefulSet{BaseObject: base}
 		if err := yaml.Unmarshal(bytes, &ss); err != nil {
 			return nil, err
 		}
 		return &ss, nil
-	case "List":
-		log.Println("its a list bro")
-		list := List{}
-		err := yaml.Unmarshal(base.Bytes(), &list)
-
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Printf("%#v", list)
-		for _, i := range list.Items {
-			fmt.Printf("%#v", i)
-		}
-		return nil, nil
 	case "":
 		// If there is an empty resource (due to eg an introduced comment),
 		// we are returning nil for the resource and nil for an error
@@ -145,6 +172,32 @@ func unmarshalKind(base baseObject, bytes []byte) (resource.Resource, error) {
 	default:
 		return &base, nil
 	}
+}
+
+func unmarshalList(source string, base *BaseObject, collection map[string]resource.Resource) error {
+	list := List{}
+	err := yaml.Unmarshal(base.Bytes(), &list)
+
+	if err != nil {
+		return err
+	}
+
+	for _, i := range list.Items {
+		i.source = source
+		r, err := unmarshalKind(i)
+
+		if r == nil {
+			continue
+		}
+
+		if err != nil {
+			return makeUnmarshalObjectErr(source, err)
+		}
+
+		collection[r.ResourceID().String()] = r
+	}
+
+	return nil
 }
 
 func makeUnmarshalObjectErr(source string, err error) *fluxerr.Error {

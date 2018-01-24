@@ -10,10 +10,10 @@ import (
 )
 
 // for convenience
-func base(source, kind, namespace, name string) baseObject {
-	b := baseObject{source: source, Kind: kind}
-	b.Meta.Namespace = namespace
-	b.Meta.Name = name
+func base(source, kind, namespace, name string) BaseObject {
+	b := BaseObject{source: source, Kind: kind}
+	b.Metadata.Namespace = namespace
+	b.Metadata.Name = name
 	return b
 }
 
@@ -48,8 +48,8 @@ metadata:
 	objA := base("test", "Deployment", "", "a-deployment")
 	objB := base("test", "Deployment", "b-namespace", "b-deployment")
 	expected := map[string]resource.Resource{
-		objA.ResourceID().String(): &Deployment{baseObject: objA},
-		objB.ResourceID().String(): &Deployment{baseObject: objB},
+		objA.ResourceID().String(): &Deployment{BaseObject: objA},
+		objB.ResourceID().String(): &Deployment{BaseObject: objB},
 	}
 
 	for id, obj := range expected {
@@ -80,13 +80,13 @@ metadata:
 	objA := base("test", "Deployment", "", "a-deployment")
 	objB := base("test", "Deployment", "b-namespace", "b-deployment")
 	expected := map[string]resource.Resource{
-		objA.ResourceID().String(): &Deployment{baseObject: objA},
-		objB.ResourceID().String(): &Deployment{baseObject: objB},
+		objA.ResourceID().String(): &Deployment{BaseObject: objA},
+		objB.ResourceID().String(): &Deployment{BaseObject: objB},
 	}
 	expectedL := len(expected)
 
 	if len(objs) != expectedL {
-		t.Errorf("expected %d objects from yaml source\n%s\n, got result: %d", expectedL, docs, len(objs))
+		t.Errorf("expected %d objects from yaml source\n%s\n, got result: %d\n %#v", expectedL, docs, len(objs), objs)
 	}
 
 	for id, obj := range expected {
@@ -123,18 +123,18 @@ kind: List
 items:
   - kind: Deployment
     metadata:
-      name: my-deployment
-  - kind: Service
+      name: a-deployment
+  - kind: Deployment
     metadata:
-      name: my-service
+      name: b-deployment
 `
 	src := "my-source"
 
-	objA := base(src, "Deployment", "", "my-deployment")
-	objB := base(src, "Service", "", "my-service")
+	objA := base(src, "Deployment", "", "a-deployment")
+	objB := base(src, "Deployment", "", "b-deployment")
 	expected := map[string]resource.Resource{
-		objA.ResourceID().String(): &Deployment{baseObject: objA},
-		objB.ResourceID().String(): &Deployment{baseObject: objB},
+		objA.ResourceID().String(): &Deployment{BaseObject: objA},
+		objB.ResourceID().String(): &Deployment{BaseObject: objB},
 	}
 
 	buffer := bytes.NewBufferString(doc)
@@ -146,7 +146,7 @@ items:
 	}
 
 	if !reflect.DeepEqual(expected, objs) {
-		t.Errorf("Expected:\n%#v\ngot:\n%#v", expected, objs)
+		t.Errorf("Expected:\n%#s\ngot:\n%#s", expected, objs)
 	}
 
 }
