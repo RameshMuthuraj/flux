@@ -151,7 +151,51 @@ items:
 
 }
 
-func TestParseMultipleLists(t *testing.T) {}
+func TestParseMultipleLists(t *testing.T) {
+	doc := `---
+kind: List
+items:
+  - kind: Deployment
+    metadata:
+      name: a-deployment
+  - kind: Deployment
+    metadata:
+      name: b-deployment
+---
+kind: List
+items:
+- kind: Deployment
+  metadata:
+    name: c-deployment
+- kind: Deployment
+  metadata:
+    name: d-deployment
+`
+	src := "my-source"
+
+	objA := base(src, "Deployment", "", "a-deployment")
+	objB := base(src, "Deployment", "", "b-deployment")
+	objC := base(src, "Deployment", "", "c-deployment")
+	objD := base(src, "Deployment", "", "d-deployment")
+	expected := map[string]resource.Resource{
+		objA.ResourceID().String(): &Deployment{BaseObject: objA},
+		objB.ResourceID().String(): &Deployment{BaseObject: objB},
+		objC.ResourceID().String(): &Deployment{BaseObject: objC},
+		objD.ResourceID().String(): &Deployment{BaseObject: objD},
+	}
+
+	buffer := bytes.NewBufferString(doc)
+
+	objs, err := ParseMultidoc(buffer.Bytes(), src)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(expected, objs) {
+		t.Errorf("Expected:\n%#s\ngot:\n%#s", expected, objs)
+	}
+}
 
 func debyte(r resource.Resource) resource.Resource {
 	if res, ok := r.(interface {
