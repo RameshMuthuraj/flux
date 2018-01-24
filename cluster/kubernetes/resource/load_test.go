@@ -117,6 +117,42 @@ data:
 	}
 }
 
+func TestParseList(t *testing.T) {
+	doc := `---
+kind: List
+items:
+  - kind: Deployment
+    metadata:
+      name: my-deployment
+  - kind: Service
+    metadata:
+      name: my-service
+`
+	src := "my-source"
+
+	objA := base(src, "Deployment", "", "my-deployment")
+	objB := base(src, "Service", "", "my-service")
+	expected := map[string]resource.Resource{
+		objA.ResourceID().String(): &Deployment{baseObject: objA},
+		objB.ResourceID().String(): &Deployment{baseObject: objB},
+	}
+
+	buffer := bytes.NewBufferString(doc)
+
+	objs, err := ParseMultidoc(buffer.Bytes(), src)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(expected, objs) {
+		t.Errorf("Expected:\n%#v\ngot:\n%#v", expected, objs)
+	}
+
+}
+
+func TestParseMultipleLists(t *testing.T) {}
+
 func debyte(r resource.Resource) resource.Resource {
 	if res, ok := r.(interface {
 		debyte()

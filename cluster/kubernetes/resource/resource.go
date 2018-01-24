@@ -1,6 +1,8 @@
 package resource
 
 import (
+	"fmt"
+	"log"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -71,6 +73,13 @@ func unmarshalObject(source string, bytes []byte) (resource.Resource, error) {
 	if err := yaml.Unmarshal(bytes, &base); err != nil {
 		return nil, err
 	}
+
+	if base.Kind == "List" {
+		// This check probably needs to happen in ParseMultidoc.
+		// Maybe append it to the map of resources there?
+		// IDEA: pass in the map to this function and append via side effect.
+		// Loop over list.Items to append.
+	}
 	r, err := unmarshalKind(base, bytes)
 	if err != nil {
 		return nil, makeUnmarshalObjectErr(source, err)
@@ -110,6 +119,20 @@ func unmarshalKind(base baseObject, bytes []byte) (resource.Resource, error) {
 			return nil, err
 		}
 		return &ss, nil
+	case "List":
+		log.Println("its a list bro")
+		list := List{}
+		err := yaml.Unmarshal(base.Bytes(), &list)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Printf("%#v", list)
+		for _, i := range list.Items {
+			fmt.Printf("%#v", i)
+		}
+		return nil, nil
 	case "":
 		// If there is an empty resource (due to eg an introduced comment),
 		// we are returning nil for the resource and nil for an error
