@@ -95,7 +95,7 @@ func getContainersFromManifest(manifest resource.BaseObject) []resource.Containe
 // ```
 func tryUpdate(def []byte, container string, newImage image.Ref, out io.Writer) error {
 	manifest, err := parseManifest(def)
-	list := resource.List{}
+
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,13 @@ func tryUpdate(def []byte, container string, newImage image.Ref, out io.Writer) 
 	var manifestContainers []resource.Container
 
 	if manifest.Kind == "List" {
-		yaml.Unmarshal(def, &list)
+		list := resource.List{}
+		err := yaml.Unmarshal(def, &list)
+
+		if err != nil {
+			return err
+		}
+
 		manifestContainers = findContainersInList(list)
 	} else {
 		manifestContainers = getContainersFromManifest(manifest)
