@@ -45,6 +45,7 @@ export GIT_SSH_COMMAND="ssh -i $SSH_PRIVATE_KEY -o UserKnownHostsFile=$KNOWN_HOS
 fail() {
     echo
     echo "*** FAILED ***"
+    echo "Reason: $1"
     echo
     exit 1
 }
@@ -69,21 +70,21 @@ wait_for_sync() {
         sleep 1
         echo -n .
     done
-    fail
+    fail "wait_for_sync timeout"
 }
 
 wait_for_upstream_commits() {
     echo -n "Waiting for $2 upstream commits"
     for i in $(seq 1 $1); do
         git -C "$CONFIG_REPO" fetch --tags > /dev/null 2>&1
-        if [ "$(git -C "$CONFIG_REPO" rev-list --count HEAD..flux-sync)" -eq "2" ]; then
+        if [ "$(git -C "$CONFIG_REPO" rev-list --count HEAD..flux-sync)" -eq "$2" ]; then
             echo
             return
         fi
         sleep 1
         echo -n .
     done
-    fail
+    fail "wait_for_upstream_commits timeout"
 }
 
 services() {
@@ -96,7 +97,9 @@ controller_container() {
 
 assert_controller_container() {
     if [ "$(services $1|controller_container $2 $3)" != "$4" ]; then
-        fail
+        echo "expected: $4"
+        echo "got:      $(services $1|controller_container $2 $3)"
+        fail "assert_controller_container failed"
     fi
 }
 
@@ -121,10 +124,10 @@ assert_controller_container default default:deployment/helloworld sidecar quay.i
 fluxctl --url http://$(minikube -p flux-test ip):30080/api/flux automate --controller=default:deployment/helloworld
 
 # Wait two minutes for two (automation and release) commits to appear
-wait_for_upstream_commits 120 2
+wait_for_upstream_commits 120 3
 
 # Examine services via flux API an assert container versions are updated
-assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-9a16ff945b9e
+assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-07a1b6b
 assert_controller_container default default:deployment/helloworld sidecar quay.io/weaveworks/sidecar:master-a000002
 
 success
