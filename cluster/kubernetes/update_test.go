@@ -54,13 +54,13 @@ func TestUpdates(t *testing.T) {
 	}
 }
 
-// func TestUpdateList(t *testing.T) {
-// 	for _, c := range []update{
-// 		{"single list", listImageContainer, listImageA, singleList, singleListOut},
-// 	} {
-// 		testUpdate(t, c)
-// 	}
-// }
+func TestUpdateList(t *testing.T) {
+	for _, c := range []update{
+		{"single list", listImageContainer, listImageA, singleList, singleListOut},
+	} {
+		testUpdate(t, c)
+	}
+}
 
 // Unusual but still valid indentation between containers: and the
 // next line
@@ -569,7 +569,7 @@ items:
               args:
                 - '-m 64'
                 - '-p 11211'
-              image: 'quay.io/weaveworks/my-deployment:master-123'
+              image: quay.io/weaveworks/my-deployment:master-123
               imagePullPolicy: IfNotPresent
               ports:
                 - name: clients
@@ -598,7 +598,7 @@ items:
               args:
                 - '-m 64'
                 - '-p 11211'
-              image: 'quay.io/weaveworks/my-deployment:master-456'
+              image: quay.io/weaveworks/my-deployment:master-456
               imagePullPolicy: IfNotPresent
               ports:
                 - name: clients

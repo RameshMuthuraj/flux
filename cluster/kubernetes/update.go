@@ -41,12 +41,13 @@ func findContainersInList(l resource.List) []resource.Container {
 	var containers []resource.Container
 
 	for _, item := range l.Items {
-		fmt.Println(item.Kind)
-		if item.Kind == "Deployment" {
-			fmt.Printf("%#v", item)
-		}
+		containers = append(containers, getContainersFromManifest(item)...)
 	}
 	return containers
+}
+
+func getContainersFromManifest(manifest resource.BaseObject) []resource.Container {
+	return append(manifest.Spec.Template.Spec.Containers, manifest.Spec.JobTemplate.Spec.Template.Spec.Containers...)
 }
 
 // Attempt to update an RC or Deployment config. This makes several assumptions
@@ -99,10 +100,6 @@ func tryUpdate(def []byte, container string, newImage image.Ref, out io.Writer) 
 		return err
 	}
 
-	if manifest.Kind == "List" {
-		yaml.Unmarshal(def, &list)
-	}
-
 	if manifest.Metadata.Name == "" && manifest.Kind != "List" {
 		return fmt.Errorf("could not find resource name")
 	}
@@ -115,9 +112,10 @@ func tryUpdate(def []byte, container string, newImage image.Ref, out io.Writer) 
 	var manifestContainers []resource.Container
 
 	if manifest.Kind == "List" {
+		yaml.Unmarshal(def, &list)
 		manifestContainers = findContainersInList(list)
 	} else {
-		manifestContainers = append(manifest.Spec.Template.Spec.Containers, manifest.Spec.JobTemplate.Spec.Template.Spec.Containers...)
+		manifestContainers = getContainersFromManifest(manifest)
 	}
 
 	for i, c := range manifestContainers {
