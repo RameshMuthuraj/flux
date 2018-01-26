@@ -145,8 +145,14 @@ items:
 		t.Error(err)
 	}
 
-	if !reflect.DeepEqual(expected, objs) {
-		t.Errorf("Expected:\n%#s\ngot:\n%#s", expected, objs)
+	for id, o := range objs {
+		if len(o.Bytes()) == 0 {
+			t.Errorf("No Bytes() for %#v", o.ResourceID())
+		}
+
+		if !reflect.DeepEqual(expected[id], debyte(o)) {
+			t.Errorf("Expected:\n%#s\ngot:\n%#s", expected[id], o)
+		}
 	}
 
 }
@@ -192,8 +198,14 @@ items:
 		t.Error(err)
 	}
 
-	if !reflect.DeepEqual(expected, objs) {
-		t.Errorf("Expected:\n%s\ngot:\n%s", expected, objs)
+	for id, o := range objs {
+		if len(o.Bytes()) == 0 {
+			t.Errorf("No Bytes() for %#v", o.ResourceID())
+		}
+
+		if !reflect.DeepEqual(expected[id], debyte(o)) {
+			t.Errorf("Expected:\n%#s\ngot:\n%#s", expected[id], o)
+		}
 	}
 }
 

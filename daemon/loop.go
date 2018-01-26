@@ -155,8 +155,14 @@ func (d *Daemon) doSync(logger log.Logger) (retErr error) {
 	// TODO logging, metrics?
 	// Get a map of all resources defined in the repo
 	allResources, err := d.Manifests.LoadManifests(working.ManifestDir())
+
 	if err != nil {
 		return errors.Wrap(err, "loading resources from repo")
+	}
+
+	fmt.Println("allResources")
+	for _, r := range allResources {
+		fmt.Printf("%#v\n", r.ResourceID())
 	}
 
 	// TODO supply deletes argument from somewhere (command-line?)

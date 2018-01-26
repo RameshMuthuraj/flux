@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"fmt"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -113,23 +112,10 @@ func unmarshalObject(source string, bytes []byte) (*BaseObject, error) {
 		return nil, err
 	}
 
-	// if base.Kind == "List" {
-	// 	// This check probably needs to happen in ParseMultidoc.
-	// 	// Maybe append it to the map of resources there?
-	// 	// IDEA: pass in the map to this function and append via side effect.
-	// 	// Loop over list.Items to append.
-	// }
-
 	return &base, nil
-	// r, err := unmarshalKind(base, bytes)
-	// if err != nil {
-	// 	return nil, makeUnmarshalObjectErr(source, err)
-	// }
-	// return r, nil
 }
 
-func unmarshalKind(base BaseObject) (resource.Resource, error) {
-	bytes := base.bytes
+func unmarshalKind(base BaseObject, bytes []byte) (resource.Resource, error) {
 	switch base.Kind {
 	case "CronJob":
 		var cj = CronJob{BaseObject: base}
@@ -184,10 +170,14 @@ func unmarshalList(source string, base *BaseObject, collection map[string]resour
 	}
 
 	for _, i := range list.Items {
+		// Re-marshal this snippet. We need this item represented in byte form.
+		// This will eventually be used to generate an update here:
+		// https://github.com/weaveworks/flux/blob/master/cluster/sync.go#L9
+		b, _ := yaml.Marshal(i)
 		i.source = source
-		r, err := unmarshalKind(i)
-		fmt.Printf("List item: %#v\n", i.Metadata.Name)
-		fmt.Printf("Resource: %#v\n", r.ResourceID().String())
+		i.bytes = b
+		r, err := unmarshalKind(i, b)
+
 		if r == nil {
 			continue
 		}

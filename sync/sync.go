@@ -21,10 +21,6 @@ func Sync(m cluster.Manifests, repoResources map[string]resource.Resource, clus 
 	}
 	clusterResources, err := m.ParseManifests(clusterBytes)
 
-	fmt.Println("Sync loop resource: ")
-	for _, m := range clusterResources {
-		fmt.Println(m.ResourceID())
-	}
 	if err != nil {
 		return errors.Wrap(err, "parsing exported resources")
 	}
@@ -49,12 +45,6 @@ func Sync(m cluster.Manifests, repoResources map[string]resource.Resource, clus 
 		prepareSyncApply(logger, clusterResources, id, res, &sync)
 	}
 
-	fmt.Println("actions")
-	for _, a := range sync.Actions {
-		fmt.Printf("Apply action: %#v\n", string(a.Apply))
-		fmt.Printf("Delete action: %#v\n", string(a.Delete))
-	}
-
 	return clus.Sync(sync)
 }
 
@@ -75,15 +65,20 @@ func prepareSyncDelete(logger log.Logger, repoResources map[string]resource.Reso
 }
 
 func prepareSyncApply(logger log.Logger, clusterResources map[string]resource.Resource, id string, res resource.Resource, sync *cluster.SyncDef) {
+	fmt.Printf("prepareSyncApply resource $%#v\n", id)
 	if res.Policy().Contains(policy.Ignore) {
 		logger.Log("resource", res.ResourceID(), "ignore", "apply")
 		return
 	}
-	if cres, ok := clusterResources[id]; ok {
-		if cres.Policy().Contains(policy.Ignore) {
+	if clusterResource, ok := clusterResources[id]; ok {
+		if clusterResource.Policy().Contains(policy.Ignore) {
 			logger.Log("resource", res.ResourceID(), "ignore", "apply")
 			return
 		}
+	}
+	fmt.Println("made it passed checks")
+	if len(res.Bytes()) > 0 {
+		fmt.Printf("res.Bytes(): %#v", string(res.Bytes()))
 	}
 	sync.Actions = append(sync.Actions, cluster.SyncAction{
 		ResourceID: id,

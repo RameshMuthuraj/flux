@@ -108,30 +108,30 @@ assert_controller_container() {
 #############################################################################
 
 # Add the helloworld deployment to the config repo and push to the central config repo in minikube
-cp "$BASEDIR/helloworld-deployment.yaml" "$CONFIG_REPO"
-git -C "$CONFIG_REPO" add helloworld-deployment.yaml
-git -C "$CONFIG_REPO" commit -m 'Deploy helloworld'
-git -C "$CONFIG_REPO" push -u origin master
+# cp "$BASEDIR/helloworld-deployment.yaml" "$CONFIG_REPO"
+# git -C "$CONFIG_REPO" add helloworld-deployment.yaml
+# git -C "$CONFIG_REPO" commit -m 'Deploy helloworld'
+# git -C "$CONFIG_REPO" push -u origin master
 
-# Wait two minutes for flux-sync tag to point to local HEAD
-wait_for_sync 120
-
-# Examine services via flux API an assert container versions are correct
-assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-a000001
-assert_controller_container default default:deployment/helloworld sidecar quay.io/weaveworks/sidecar:master-a000001
-
-# Now enable automation
-fluxctl --url http://$(minikube -p flux-test ip):30080/api/flux automate --controller=default:deployment/helloworld
-
-# Wait two minutes for two (automation and release) commits to appear
-wait_for_upstream_commits 120 3
-
-# Examine services via flux API an assert container versions are updated
-assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-07a1b6b
-assert_controller_container default default:deployment/helloworld sidecar quay.io/weaveworks/sidecar:master-a000002
+# # Wait two minutes for flux-sync tag to point to local HEAD
+# wait_for_sync 120
+#
+# # Examine services via flux API an assert container versions are correct
+# assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-a000001
+# assert_controller_container default default:deployment/helloworld sidecar quay.io/weaveworks/sidecar:master-a000001
+#
+# # Now enable automation
+# fluxctl --url http://$(minikube -p flux-test ip):30080/api/flux automate --controller=default:deployment/helloworld
+#
+# # Wait two minutes for two (automation and release) commits to appear
+# wait_for_upstream_commits 120 3
+#
+# # Examine services via flux API an assert container versions are updated
+# assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-07a1b6b
+# assert_controller_container default default:deployment/helloworld sidecar quay.io/weaveworks/sidecar:master-a000002
 
 # Add a List of Deployments
-git -C "$CONFIG_REPO" pull
+# git -C "$CONFIG_REPO" pull
 cp "$BASEDIR/k8s-list.yaml" "$CONFIG_REPO"
 git -C "$CONFIG_REPO" add k8s-list.yaml
 git -C "$CONFIG_REPO" commit -m 'Deploy list of containers'

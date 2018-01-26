@@ -81,7 +81,7 @@ func ParseMultidoc(multidoc []byte, source string) (map[string]resource.Resource
 				return nil, err
 			}
 		} else {
-			r, err := unmarshalKind(*obj)
+			r, err := unmarshalKind(*obj, obj.Bytes())
 
 			if r == nil {
 				continue
@@ -98,9 +98,6 @@ func ParseMultidoc(multidoc []byte, source string) (map[string]resource.Resource
 		return objs, errors.Wrapf(err, "scanning multidoc from %q", source)
 	}
 
-	for _, o := range objs {
-		fmt.Println(o.Source())
-	}
 	return objs, nil
 }
 

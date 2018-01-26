@@ -196,6 +196,7 @@ func (d *Daemon) queueJob(do DaemonJobFunc) job.ID {
 
 // Apply the desired changes to the config files
 func (d *Daemon) UpdateManifests(ctx context.Context, spec update.Spec) (job.ID, error) {
+	fmt.Println("Daemon.UpdateManifests called")
 	var id job.ID
 	if spec.Type == "" {
 		return id, errors.New("no type in update spec")
@@ -216,6 +217,7 @@ func (d *Daemon) UpdateManifests(ctx context.Context, spec update.Spec) (job.ID,
 }
 
 func (d *Daemon) updatePolicy(spec update.Spec, updates policy.Updates) DaemonJobFunc {
+	fmt.Println("updatePolicy called")
 	return func(ctx context.Context, jobID job.ID, working *git.Checkout, logger log.Logger) (*event.CommitEventMetadata, error) {
 		// For each update
 		var serviceIDs []flux.ResourceID
