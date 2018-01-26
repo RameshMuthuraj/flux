@@ -18,27 +18,6 @@ const (
 // -- unmarshaling code for specific object and field types
 
 // struct to embed in objects, to provide default implementation
-// type BaseObject struct {
-// 	source string
-// 	bytes  []byte
-// 	Kind   string `yaml:"kind"`
-// 	Meta   struct {
-// 		Namespace   string            `yaml:"namespace"`
-// 		Name        string            `yaml:"name"`
-// 		Annotations map[string]string `yaml:"annotations,omitempty"`
-// 	} `yaml:"metadata"`
-// }
-type Metadata struct {
-	Name        string            `yaml:"name"`
-	Annotations map[string]string `yaml:"annotations"`
-	Namespace   string            `yaml:"namespace"`
-}
-
-type Container struct {
-	Name  string `yaml:"name"`
-	Image string `yaml:"image"`
-}
-
 type BaseObject struct {
 	source   string
 	bytes    []byte
@@ -59,7 +38,18 @@ type BaseObject struct {
 				} `yaml:"template"`
 			} `yaml:"spec"`
 		} `yaml:"jobTemplate"`
-	} `yaml:"spec"`
+	} `yaml:"spec,omitempty"`
+}
+
+type Metadata struct {
+	Name        string            `yaml:"name"`
+	Annotations map[string]string `yaml:"annotations"`
+	Namespace   string            `yaml:"namespace"`
+}
+
+type Container struct {
+	Name  string `yaml:"name"`
+	Image string `yaml:"image"`
 }
 
 func (m Metadata) AnnotationsOrNil() map[string]string {

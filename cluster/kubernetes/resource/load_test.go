@@ -151,7 +151,7 @@ items:
 		}
 
 		if !reflect.DeepEqual(expected[id], debyte(o)) {
-			t.Errorf("Expected:\n%#s\ngot:\n%#s", expected[id], o)
+			t.Errorf("Expected:\n%#v\ngot:\n%#v", expected[id], o)
 		}
 	}
 
