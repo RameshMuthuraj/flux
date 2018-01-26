@@ -16,7 +16,8 @@ func (c *Manifests) LoadManifests(paths ...string) (map[string]resource.Resource
 }
 
 func (c *Manifests) ParseManifests(allDefs []byte) (map[string]resource.Resource, error) {
-	return kresource.ParseMultidoc(allDefs, "exported")
+	mans, err := kresource.ParseMultidoc(allDefs, "exported")
+	return mans, err
 }
 
 func (c *Manifests) UpdateDefinition(def []byte, container string, image image.Ref) ([]byte, error) {

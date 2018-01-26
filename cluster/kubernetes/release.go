@@ -69,6 +69,11 @@ func (c *Kubectl) apply(logger log.Logger, cs changeSet, errs cluster.SyncError)
 		}
 	}
 
+	fmt.Println("change set:")
+	for _, c := range cs.noNsObjs {
+		fmt.Printf("Object: %#v\n", c)
+	}
+
 	// When deleting resources we must ensure any resource in a non-default
 	// namespace is deleted before the namespace that it is in. Since namespace
 	// resources don't specify a namespace, this ordering guarantees that.

@@ -130,4 +130,17 @@ wait_for_upstream_commits 120 3
 assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-07a1b6b
 assert_controller_container default default:deployment/helloworld sidecar quay.io/weaveworks/sidecar:master-a000002
 
+# Add a List of Deployments
+git -C "$CONFIG_REPO" pull
+cp "$BASEDIR/k8s-list.yaml" "$CONFIG_REPO"
+git -C "$CONFIG_REPO" add k8s-list.yaml
+git -C "$CONFIG_REPO" commit -m 'Deploy list of containers'
+git -C "$CONFIG_REPO" push -u origin master
+
+wait_for_sync 120
+
+# Deployments specified in a List
+assert_controller_container default default:deployment/a-deployment a-container quay.io/weaveworks/helloworld:master-a000001
+assert_controller_container default default:deployment/b-deployment b-container quay.io/weaveworks/helloworld:master-a000001
+
 success

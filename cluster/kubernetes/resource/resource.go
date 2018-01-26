@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"fmt"
 	"strings"
 
 	yaml "gopkg.in/yaml.v2"
@@ -185,7 +186,8 @@ func unmarshalList(source string, base *BaseObject, collection map[string]resour
 	for _, i := range list.Items {
 		i.source = source
 		r, err := unmarshalKind(i)
-
+		fmt.Printf("List item: %#v\n", i.Metadata.Name)
+		fmt.Printf("Resource: %#v\n", r.ResourceID().String())
 		if r == nil {
 			continue
 		}

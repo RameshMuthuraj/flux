@@ -1,6 +1,8 @@
 package sync
 
 import (
+	"fmt"
+
 	"github.com/go-kit/kit/log"
 	"github.com/pkg/errors"
 
@@ -18,6 +20,11 @@ func Sync(m cluster.Manifests, repoResources map[string]resource.Resource, clus 
 		return errors.Wrap(err, "exporting resource defs from cluster")
 	}
 	clusterResources, err := m.ParseManifests(clusterBytes)
+
+	fmt.Println("Sync loop resource: ")
+	for _, m := range clusterResources {
+		fmt.Println(m.ResourceID())
+	}
 	if err != nil {
 		return errors.Wrap(err, "parsing exported resources")
 	}
@@ -40,6 +47,12 @@ func Sync(m cluster.Manifests, repoResources map[string]resource.Resource, clus 
 
 	for id, res := range repoResources {
 		prepareSyncApply(logger, clusterResources, id, res, &sync)
+	}
+
+	fmt.Println("actions")
+	for _, a := range sync.Actions {
+		fmt.Printf("Apply action: %#v\n", string(a.Apply))
+		fmt.Printf("Delete action: %#v\n", string(a.Delete))
 	}
 
 	return clus.Sync(sync)

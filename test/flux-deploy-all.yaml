@@ -83,8 +83,8 @@ spec:
         volumeMounts:
         - name: git-key
           mountPath: /etc/fluxd/ssh
-        - name: ssh-known-hosts
-          mountPath: /root/.ssh
+        # - name: ssh-known-hosts
+        #   mountPath: /root/.ssh
         args:
         - --memcached-hostname=memcached
         - --memcached-timeout=100ms
@@ -95,4 +95,4 @@ spec:
         - --git-branch=master
         # Tune up to make tests run quicker
         - --registry-poll-interval=60s
-        - --git-poll-interval=60s
+        - --git-poll-interval=10s

@@ -97,6 +97,10 @@ func ParseMultidoc(multidoc []byte, source string) (map[string]resource.Resource
 	if err := chunks.Err(); err != nil {
 		return objs, errors.Wrapf(err, "scanning multidoc from %q", source)
 	}
+
+	for _, o := range objs {
+		fmt.Println(o.Source())
+	}
 	return objs, nil
 }
 

@@ -36,6 +36,7 @@ func clone(ctx context.Context, workingDir string, repoURL, repoBranch string) (
 	}
 	args = append(args, repoURL, repoPath)
 	if err := execGitCmd(ctx, workingDir, nil, args...); err != nil {
+
 		return "", errors.Wrap(err, "git clone")
 	}
 	return repoPath, nil
