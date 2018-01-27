@@ -1,7 +1,6 @@
 package cluster
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -40,10 +39,6 @@ func UpdateManifest(m Manifests, root string, serviceID flux.ResourceID, f func(
 		return err
 	}
 
-	fmt.Println("defined services:")
-	for k, v := range services {
-		fmt.Printf("%#v: %#v\n", k, v)
-	}
 	paths := services[serviceID]
 	if len(paths) == 0 {
 		return ErrNoResourceFilesFoundForService

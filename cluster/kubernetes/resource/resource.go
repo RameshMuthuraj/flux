@@ -19,13 +19,15 @@ const (
 
 // struct to embed in objects, to provide default implementation
 type BaseObject struct {
-	source   string
-	bytes    []byte
-	Metadata Metadata `yaml:"metadata"`
-	Kind     string   `yaml:"kind"`
-	Spec     struct {
+	source     string
+	bytes      []byte
+	APIVersion string   `yaml:"apiVersion"`
+	Metadata   Metadata `yaml:"metadata"`
+	Kind       string   `yaml:"kind"`
+	Spec       struct {
 		Template struct {
-			Spec struct {
+			Metadata Metadata
+			Spec     struct {
 				Containers []Container `yaml:"containers"`
 			} `yaml:"spec"`
 		} `yaml:"template"`
@@ -45,6 +47,7 @@ type Metadata struct {
 	Name        string            `yaml:"name"`
 	Annotations map[string]string `yaml:"annotations"`
 	Namespace   string            `yaml:"namespace"`
+	Labels      map[string]string `yaml:"labels"`
 }
 
 type Container struct {
@@ -163,10 +166,10 @@ func unmarshalList(source string, base *BaseObject, collection map[string]resour
 		// Re-marshal this snippet. We need this item represented in byte form.
 		// This will eventually be used to generate an update here:
 		// https://github.com/weaveworks/flux/blob/master/cluster/sync.go#L9
-		b, _ := yaml.Marshal(i)
+		itemBytes, _ := yaml.Marshal(i)
 		i.source = source
-		i.bytes = b
-		r, err := unmarshalKind(i, b)
+		i.bytes = itemBytes
+		r, err := unmarshalKind(i, itemBytes)
 
 		if r == nil {
 			continue

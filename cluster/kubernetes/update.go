@@ -47,7 +47,8 @@ func findContainersInList(l resource.List) []resource.Container {
 }
 
 func getContainersFromManifest(manifest resource.BaseObject) []resource.Container {
-	return append(manifest.Spec.Template.Spec.Containers, manifest.Spec.JobTemplate.Spec.Template.Spec.Containers...)
+	// return append(manifest.Spec.Template.Spec.Containers, manifest.Spec.JobTemplate.Spec.Template.Spec.Containers...)
+	return manifest.Spec.Template.Spec.Containers
 }
 
 // Attempt to update an RC or Deployment config. This makes several assumptions

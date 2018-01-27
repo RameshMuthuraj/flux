@@ -58,6 +58,10 @@ func (c *Kubectl) apply(logger log.Logger, cs changeSet, errs cluster.SyncError)
 		if len(objs) == 0 {
 			return
 		}
+
+		for _, o := range objs {
+			fmt.Printf("obj.bytes: %#v\n", string(o.bytes))
+		}
 		args = append(args, cmd)
 		if err := c.doCommand(logger, makeMultidoc(objs), args...); err != nil {
 			for _, obj := range objs {

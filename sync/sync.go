@@ -1,8 +1,6 @@
 package sync
 
 import (
-	"fmt"
-
 	"github.com/go-kit/kit/log"
 	"github.com/pkg/errors"
 
@@ -65,7 +63,6 @@ func prepareSyncDelete(logger log.Logger, repoResources map[string]resource.Reso
 }
 
 func prepareSyncApply(logger log.Logger, clusterResources map[string]resource.Resource, id string, res resource.Resource, sync *cluster.SyncDef) {
-	fmt.Printf("prepareSyncApply resource $%#v\n", id)
 	if res.Policy().Contains(policy.Ignore) {
 		logger.Log("resource", res.ResourceID(), "ignore", "apply")
 		return
@@ -75,10 +72,6 @@ func prepareSyncApply(logger log.Logger, clusterResources map[string]resource.Re
 			logger.Log("resource", res.ResourceID(), "ignore", "apply")
 			return
 		}
-	}
-	fmt.Println("made it passed checks")
-	if len(res.Bytes()) > 0 {
-		fmt.Printf("res.Bytes(): %#v", string(res.Bytes()))
 	}
 	sync.Actions = append(sync.Actions, cluster.SyncAction{
 		ResourceID: id,

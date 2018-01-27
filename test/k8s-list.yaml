@@ -6,37 +6,25 @@ items:
     kind: Deployment
     metadata:
       name: a-deployment
-      namespace: default
     spec:
-      replicas: 1
       template:
         metadata:
           labels:
             name: a-deployment
         spec:
           containers:
-          - name: a-container
+          - name: a-deployment
             image: quay.io/weaveworks/helloworld:master-a000001
-            args:
-            - -msg=Ahoy
-            ports:
-            - containerPort: 80
   - apiVersion: extensions/v1beta1
     kind: Deployment
     metadata:
       name: b-deployment
-      namespace: default
     spec:
-      replicas: 1
       template:
         metadata:
           labels:
             name: b-deployment
         spec:
           containers:
-          - name: b-container
+          - name: b-deployment
             image: quay.io/weaveworks/helloworld:master-a000001
-            args:
-            - -msg=Adios
-            ports:
-            - containerPort: 80

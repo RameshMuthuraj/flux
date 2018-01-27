@@ -160,11 +160,6 @@ func (d *Daemon) doSync(logger log.Logger) (retErr error) {
 		return errors.Wrap(err, "loading resources from repo")
 	}
 
-	fmt.Println("allResources")
-	for _, r := range allResources {
-		fmt.Printf("%#v\n", r.ResourceID())
-	}
-
 	// TODO supply deletes argument from somewhere (command-line?)
 	if err := fluxsync.Sync(d.Manifests, allResources, d.Cluster, false, logger); err != nil {
 		logger.Log("err", err)

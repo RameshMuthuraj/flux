@@ -108,13 +108,13 @@ assert_controller_container() {
 #############################################################################
 
 # Add the helloworld deployment to the config repo and push to the central config repo in minikube
-# cp "$BASEDIR/helloworld-deployment.yaml" "$CONFIG_REPO"
-# git -C "$CONFIG_REPO" add helloworld-deployment.yaml
-# git -C "$CONFIG_REPO" commit -m 'Deploy helloworld'
-# git -C "$CONFIG_REPO" push -u origin master
+cp "$BASEDIR/helloworld-deployment.yaml" "$CONFIG_REPO"
+git -C "$CONFIG_REPO" add helloworld-deployment.yaml
+git -C "$CONFIG_REPO" commit -m 'Deploy helloworld'
+git -C "$CONFIG_REPO" push -u origin master
 
-# # Wait two minutes for flux-sync tag to point to local HEAD
-# wait_for_sync 120
+# Wait two minutes for flux-sync tag to point to local HEAD
+wait_for_sync 120
 #
 # # Examine services via flux API an assert container versions are correct
 # assert_controller_container default default:deployment/helloworld helloworld quay.io/weaveworks/helloworld:master-a000001
